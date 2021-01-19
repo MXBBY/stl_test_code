@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <ext/pool_allocator.h>
+#include "my_alloctor.h"
 
 struct _list_node_base{
     _list_node_base* _M_next;
@@ -72,7 +74,6 @@ template <typename T>
 inline void destrory(T* pointer){
     pointer->~T();
 }
-
 template <typename _Tp,typename Alloc>
 class simple_alloc{
     public:
@@ -92,7 +93,7 @@ class simple_alloc{
         }
 };
 
-template <typename _Tp,typename _Alloc=std::allocator<_Tp>>
+template <typename _Tp,typename _Alloc=lin_allocator::alloc>
 class list{
     protected:
         typedef _list_node<_Tp> list_node;
@@ -134,9 +135,9 @@ class list{
         reference back(){
             return *(--end());
         }
-        protected:
+
             link_type get_node(){
-                return list_node_allocator::allocate(sizeof(_Tp));
+                return list_node_allocator::allocate(1);
             }
             void put_node(link_type p){
                  list_node_allocator::deallocate(p);
@@ -246,15 +247,12 @@ void list<T,Alloc>::transfer(iterator position,iterator first,iterator last){
 #include <iostream>
 
 int main(){
+    typedef _list_node<int> node;
     list<int> c;
-
-    for(int i=0;i<10;i++){
-        c.push_back (i);
-    }
-    for(int i=0;i<10;i++){
-        std::cout << c.front()<<std::endl;
-        c.pop_front();
-    }
+    node* p=c.create_node(10);
+    cout<<p<<endl;
+    cout<<p->_M_data<<endl;
+    
     return 1;
 }
 
